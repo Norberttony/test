@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+        <meta name = "description" content = "Invite a friend to play a game of Hyper Chess!">
+
+        <title>Hyper Chess</title>
+
+        <link rel = "icon" type = "image/png" href = "favicon.ico"/>
+        
+        <!-- board/main styles -->
+        <link href = "styles/warn-bar.css"      rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/menu.css"          rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/lobby.css"         rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/my-games.css"      rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/invite.css"        rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/peer-info.css"     rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/coords.css"        rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/board.css"         rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/pieces.css"        rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/web-phil.css"      rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/highlights.css"    rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/puzzles.css"       rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/style.css"         rel = "stylesheet" type = "text/css"/>
+
+        <!-- widget styles -->
+        <link href = "styles/widgets/annotations.css"   rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/widgets/pgn-viewer.css"    rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/widgets/extras.css"        rel = "stylesheet" type = "text/css"/>
+
+        <!-- Style styles. yup. styles that style styles. stylish. -->
+        <link href = "styles/board-styles.css"  rel = "stylesheet" type = "text/css"/>
+        <link href = "styles/piece-styles.css"  rel = "stylesheet" type = "text/css"/>
+        
+        <script src = "scripts/menus/menus.js"></script>
+
+        <script src = "scripts/workers/task-manager.js"></script>
+
+        <!-- game scripts -->
+        <script src = "scripts/game/module-loader.js"></script>
+        <script src = "scripts/graphics/module-init.js"></script>
+
+        <script src = "scripts/hyper-active/bot-wrapper.js"></script>
+
+        <!-- widget scripts -->
+        <script defer src = "scripts/graphics/widgets/board-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/annotator-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/audio-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/animations.js"></script>
+        <script defer src = "scripts/graphics/pgn/pgn-control.js"></script>
+        <script defer src = "scripts/graphics/pgn/variation.js"></script>
+        <script defer src = "scripts/graphics/pgn/pgn-data.js"></script>
+        <script defer src = "scripts/graphics/widgets/pgn-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/extras-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/players-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/network-widget.js"></script>
+        <script defer src = "scripts/graphics/widgets/web-phil-widget.js"></script>
+
+        <!-- graphics scripts -->
+        <script defer src = "scripts/graphics/board-graphics.js"></script>
+        <script defer src = "scripts/graphics/input.js"></script>
+        <script defer src = "scripts/graphics/pool.js"></script>
+        <script defer src = "scripts/graphics/graphics.js"></script>
+        <script defer src = "scripts/graphics/dialog.js"></script>
+        <script defer src = "scripts/graphics/resize.js"></script>
+        <script defer src = "scripts/graphics/utils.js"></script>
+
+        <!-- network -->
+        <script defer src = "scripts/network/cache.js"></script>
+        <script defer src = "scripts/network/create-game.js"></script>
+        <script defer src = "scripts/network/db-utils.js"></script>
+        <script defer src = "scripts/network/challenges.js"></script>
+        <script defer src = "scripts/network/games.js"></script>
+
+        <!-- puzzles!! -->
+        <script defer src = "scripts/graphics/puzzles.js"></script>
+
+        <script defer src = "scripts/lobby/refresh.js"></script>
+
+        <script defer src = "scripts/lobby/view-games.js"></script>
+        <script defer src = "scripts/lobby/featured-game.js"></script>
+
+        <script defer src = "scripts/menus/init-hash.js"></script>
+
+    </head>
+    <body>
+
+        <nav id = "menu">
+            <button id = "menu_play"        onclick = "changeHash('#lobby');">Play</button>
+            <button id = "menu_my-games"    onclick = "changeHash('#my-games');">View My Games</button>
+            <button id = "menu_board"       onclick = "changeHash('#board');">Analysis Board</button>
+            <button id = "menu_puzzles"     onclick = "changeHash(`#puzzles=${PUZZLE ? PUZZLE.id : 0}`);">Puzzles</button>
+            <a href = "https://www.carusos.org/Hyperchess/hyperchess.html" target = "_blank">
+                <button>Tutorial</button>
+            </a>
+        </nav>
+
+        <div id = "my-games_container" style = "display: none;">
+            <h1 style = "margin: 20px; font-size: xxx-large">Your games:</h1>
+            <p id = "my-games_fetching" style = "font-size: xx-large"></p>
+
+            <button id = "my-games_download" onclick = "downloadMyGames(allMyGames);">Download my games</button>
+
+            <div id = "my-games"></div>
+        </div>
+
+        <div id = "lobby" class = "lobby" style = "display: none;">
+            <button class = "lobby__create-button" onclick = "showCreateGamePopup(true);">Click here to create your own challenge</button>
+            <p>Or</p>
+            <button class = "lobby__play-phil" onclick = "showCreateGamePopup(false);">Play against a bot</button>
+            <h1>Public Challenges</h1>
+            <div class = "lobby__header">
+                <span>ID</span>
+                <span>Name</span>
+                <span>Side</span>
+                <span>FEN</span>
+            </div>
+            <div class = "lobby__list">
+                <div class="lobby__list-loading">
+                    <img class="lobby__list-loading-img" src="./images/pieces/immobilizer.png">
+                </div>
+                <div class = "lobby__list-items"></div>
+            </div>
+
+            <div class = "lobby__featured-game">
+                <h1 class = "lobby__featured-title">Featured Game</h1>
+                <div id = "lobby__featured-game-container"></div>
+                <button onclick = "goToFeaturedGame();">Go to game</button>
+            </div>
+        </div>
+
+        <div id = "main-board" class = "board-graphics board-graphics--board-blue board-graphics--pieces-cburnett"></div>
+
+        <div id = "dialog-box-container">
+            <div id = "dialog-box">
+                <p id = "dialog_title">Connecting to user . . .</p>
+                <p id = "dialog_desc">This might take some time...</p>
+            </div>
+            <div id = "result-box">
+                <p id = "result-box_result">No one Wins</p>
+                <p id = "result-box_local">You <span id = "result_mewin">did not win</span> by <span id = "how_span">cheating</span></p>
+                <button onclick = "hideDialogBox();" style = "margin-top: 40px;">View Game</button><br />
+                <button id = "result-box_rematch" onclick = "offerRematch();">Offer Rematch</button>
+            </div>
+        </div>
+
+        <div id = "invite-popup-container">
+            <div id = "create-game">
+                <h1>Create a game</h1>
+                <form id = "create-game__form" class = "create-game-form create-game-form--multiplayer">
+                    <div class = "create-game-form__input-pair">
+                        <label for = "color">You play as:</label>
+                        <select name = "color">
+                            <option value = "random">Random</option>
+                            <option value = "white">White</option>
+                            <option value = "black">Black</option>
+                        </select>
+                    </div>
+
+                    <div class = "create-game-form__input-pair create-game-form__input-pair--multiplayer">
+                        <label for = "visibility">Game visibility:</label>
+                        <div>
+                            <input style = "width: auto;" name = "visibility" type = "radio" value = "public" checked = true> Public
+                            <input style = "width: auto;" name = "visibility" type = "radio" value = "private"> Private
+                        </div>
+                    </div>
+
+                    <div class = "create-game-form__input-pair create-game-form__input-pair--bot">
+                        <label for = "bot">Playing against:</label>
+                        <select name = "bot">
+                            <option value = "random">Phil</option>
+                        </select>
+                    </div>
+
+                    <div class = "create-game-form__input-pair">
+                        <span>
+                            <label for = "create-game__fen">FEN:</label>
+                            <input id = "create-game__fen" name = "fen">
+                        </span>
+                    </div>
+                    <input id = "create-game__use-default-fen" name = "starting-fen" type = "checkbox" checked = true>
+                    <label for = "create-game__use-default-fen">Use starting FEN instead</label>
+
+                    <div id = "create-game__board"></div>
+                    
+                    <div class = "create-game-form__input-pair">
+                        <input style = "width: 100%;" type = "submit" value = "Enter">
+                    </div>
+                </form>
+                <button onclick = "hideCreateGamePopup();" style = "margin-top: 5px; width: 100%;">Cancel</button>
+            </div>
+            <div id = "invite-popup">
+                <p>Send this link to a friend to play a game against them!</p>
+                <input id = "peer-id" readonly onfocus = "this.select();" onclick = "this.setSelectionRange(0, this.value.length)">
+                <button onclick = "cancelInvite();">Cancel Invite</button><button id = "invite_copy">Copy to Clipboard</button>
+                <button onclick = "shareInvite();">Share</button>
+            </div>
+        </div>
+
+        <div id = "warn-bar">
+            <button id = "warn-bar_close" onclick = "this.parentNode.style.display = 'none';">&#10006;</button>
+            This is a completed Hyper Chess game that was played between two anonymous players.
+        </div>
+
+    </body>
+</html>
