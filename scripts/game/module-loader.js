@@ -8,7 +8,10 @@ class Module_Loader {
 
     // returns a promise
     load(url){
-        const promise = import(url);
+        const promise = import(url)
+            .catch((err) => {
+                console.log(`Failed to import module at ${url} because ${err}`);
+            });
         this.promises.push(promise);
         return promise;
     }
